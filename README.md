@@ -1,0 +1,1 @@
+This is a C programming language Knapsack program. I modified it for a much cleaner and scalable code. If you want to check out how the code was made. Follow my yt channel: https://www.youtube.com/channel/UCDu_8uC0F2dU9IkZnncofiQ
