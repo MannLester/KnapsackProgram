@@ -9,7 +9,7 @@ double* calculate_ratios(int *weights, int *values, int num) {
     return ratios;
 }
 
-void selection_sort_value(double *arr, int *sorted_index, int num) {
+void selection_sort_value(double *arr, int *sorted_index, int *sorted_weights, int num) {
     for (int i = 0; i < num - 1; i++) {
         int max = i;
         for (int j = i + 1; j < num; j++) {
@@ -26,10 +26,14 @@ void selection_sort_value(double *arr, int *sorted_index, int num) {
         int temp_index = sorted_index[max];
         sorted_index[max] = sorted_index[i];
         sorted_index[i] = temp_index;
+        
+        int temp_weights = sorted_weights[max];
+        sorted_weights[max] = sorted_weights[i];
+        sorted_weights[i] = temp_weights;
     }
 }
 
-void selection_sort_weight(int *arr, int *sorted_index, int num) {
+void selection_sort_weight(int *arr, int *sorted_index, int *sorted_values, int num) {
     for (int i = 0; i < num - 1; i++) {
         int max = i;
         for (int j = i + 1; j < num; j++) {
@@ -46,6 +50,10 @@ void selection_sort_weight(int *arr, int *sorted_index, int num) {
         int temp_index = sorted_index[max];
         sorted_index[max] = sorted_index[i];
         sorted_index[i] = temp_index;
+        
+        int temp_value = sorted_values[max];
+        sorted_values[max] = sorted_values[i];
+        sorted_values[i] = temp_value;
     }
 }
 
@@ -54,11 +62,13 @@ void max_value(int *weights, int *values, int num, int capacity) {
     double *ratios = calculate_ratios(weights, values, num);
 
     int sorted_index[num];
+    int sorted_weights[num];
     for (int i = 0; i < num; i++) {
+    	sorted_weights[i] = weights[i];
         sorted_index[i] = i;
     }
 
-    selection_sort_value(ratios, sorted_index, num);
+    selection_sort_value(ratios, sorted_index, sorted_weights, num);
 
     int fill = 0;
     double overall_value = 0;
@@ -69,14 +79,15 @@ void max_value(int *weights, int *values, int num, int capacity) {
             total_value = values[sorted_index[i]];
             fill += weights[sorted_index[i]];
         } else if (fill + weights[sorted_index[i]] > capacity) {
-            total_value = ratios[sorted_index[i]] * (capacity - fill);
+            total_value = ratios[i] * (capacity - fill);
+            sorted_weights[i] = capacity-fill;
             printf("Remaining Capacity filled with Item %d\n", sorted_index[i] + 1);
             fill = capacity;
         } else{
             printf("Capacity full\n");
             break;
         }
-        printf("Item %d: Value: %.2f\n", sorted_index[i] + 1, total_value); // Adding 1 to match item numbering
+        printf("Item %d: Weight %d: Value: %.2f\n", sorted_index[i] + 1, sorted_weights[i], total_value); // Adding 1 to match item numbering
         overall_value += total_value;
     }
     printf("Overall Value is: %.2f\n", overall_value);
@@ -95,7 +106,7 @@ void max_weight(int *weights, int *values, int num, int capacity) {
         sorted_index[i] = i;
     }
 	
-	selection_sort_weight(sorted_weights, sorted_index, num);
+	selection_sort_weight(sorted_weights, sorted_index, sorted_values, num);
     // Fill the capacity using the highest weight items first
     int fill = 0;
     double overall_value = 0;
@@ -103,10 +114,11 @@ void max_weight(int *weights, int *values, int num, int capacity) {
     for (int i = 0; i < num; i++) {
         double total_value = 0;
         if (fill + sorted_weights[i] < capacity) {
-            total_value = sorted_weights[i] * (double)sorted_values[i] / weights[i];
+            total_value = sorted_weights[i] * (double)sorted_values[i] / sorted_weights[i];
             fill += sorted_weights[i];
         } else if (fill + sorted_weights[i] > capacity) {
-            total_value = (capacity - fill) * (double)sorted_values[i] / weights[i];
+            total_value = (capacity - fill) * (double)sorted_values[i] / sorted_weights[i];
+            sorted_weights[i] = capacity-fill;
             printf("Remaining Capacity filled with Item %d\n", sorted_index[i] + 1);
             fill = capacity;
         } else  if (fill + weights[sorted_index[i]] == capacity){
